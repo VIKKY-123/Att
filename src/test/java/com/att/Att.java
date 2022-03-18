@@ -1,116 +1,95 @@
 package com.att;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.Duration;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.Test;
 
+import com.sale.att.Base_Class;
+import com.sale.att.FileLib;
 import com.sale.att.IAutoConstants;
+import com.sale.att.WebDriverUility;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
+import PageObjectModal.CompareActions;
+import PageObjectModal.Customize_your_smartwatchPage;
+import PageObjectModal.Homepage;
+import PageObjectModal.Phones_device;
+import PageObjectModal.SmortWatch;
+@Test
+public class Att extends Base_Class {
 
-public class Att {
-	
-	public void smarthwatches() throws IOException, InterruptedException {
-		WebDriverManager.chromedriver().setup();
-		WebDriver driver= new ChromeDriver();
-		driver.get("https://www.att.com/");
-		driver.manage().window().maximize();
-		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(15));
-		driver.findElement(By.xpath("//span[text()='Phones & devices']")).click();
-		driver.findElement(By.xpath("//a[@id=\"Categories-3\"]")).click();
-		Thread.sleep(3000);
-		JavascriptExecutor js = (JavascriptExecutor)driver;
-		
-		
-		WebElement button4 = driver.findElement(By.xpath("//input[@aria-label=\"Compare\"]"));
-		js.executeScript("arguments[0].click();", button4);
-		
+	public WebDriver driver;
+
+	public void smarthwatches() throws Throwable {
+
+		Homepage homepage=new Homepage(driver);
+		Phones_device phone_device=new Phones_device(driver);
+		SmortWatch smortwatch=new  SmortWatch(driver);
+		CompareActions compareactions=new  CompareActions(driver);
+		Customize_your_smartwatchPage customize=new Customize_your_smartwatchPage(driver);
+		WebDriverUility webutil=new WebDriverUility();
+
+		homepage.getPhones_Devicestab().click();
+		phone_device.getSmortwatchlnk().click();	
+
+		Thread.sleep(2000);
+		JavascriptExecutor js = (JavascriptExecutor)driver;	
+
+
+		WebElement button1 = smortwatch.getCompareckbox();
+		js.executeScript("arguments[0].click();", button1);
+
 		Thread.sleep(2000);
 
 		for (int i = 0; i <= 4; i++) {
 			driver.findElement(By.xpath("//a[@id=\"product_card"+i+"\"]/ancestor::div[@class=\"flex\"]//input")).click();
 
 		}
-		
-		
-		
-		
-		WebElement button = driver.findElement(By.xpath("//button[@type=\"button\"]"));
-		js.executeScript("arguments[0].click();", button);
-		
-	
+		WebElement button2 =smortwatch.getComparebtn();
+		js.executeScript("arguments[0].click();", button2);
 
-		TakesScreenshot takescrshrt = (TakesScreenshot)driver;
-		File src = takescrshrt.getScreenshotAs(OutputType.FILE);
-		File dest=new File("user.dir"+"/ScreenShort1"+"compare1"+".png");
-		FileUtils.copyFile(src, dest);
+		webutil.TakeScreenshort(driver, "comapere1");
 
-		driver.findElement(By.xpath("//div[@id=\"deviceLabel4\"]/.")).click();
-		
+		compareactions.getProcessorlink().click();
+
 		Thread.sleep(2000);
-		 WebElement location1 = driver.findElement(By.xpath("//div[@id=\"deviceCta2\"]"));
-		
+		WebElement location1 =compareactions.getShopnowbtn();
+
 		js.executeScript("arguments[0].scrollIntoView();", location1 );
 		Thread.sleep(3000);
 
-		 driver.findElement(By.xpath("//div[@id=\"deviceCta2\"]")).click();
-		
+		compareactions.getShopnowbtn().click();
 
-		driver.findElement(By.xpath("//input[@id=\"StarlightAluminumPlatinumBlackSport\"]")).click();
+		customize.getColorBtn().click();
 
-		File src2 = takescrshrt.getScreenshotAs(OutputType.FILE);
-		File dest2=new File("user.dir"+"/ScreenShort1"+"Smartwatchdetatils"+".png");
-		FileUtils.copyFile(src2, dest2);
+		webutil.TakeScreenshort(driver, "Smartwatchdetatils");
+
+		WebElement location = customize.getPrizevalue();
 
 
-		Point location = driver.findElement(By.xpath("//h2[text()='Pricing option']")).getLocation();
-
-		
 		js.executeScript("arguments[0].scrollIntoView();", location );
 
-		File src3 = takescrshrt.getScreenshotAs(OutputType.FILE);
-		File dest3=new File("user.dir"+"/ScreenShort1"+"Smartwatchdetatils_2"+".png");
-		FileUtils.copyFile(src3, dest3);
-		
-		
-		String priceOfProduct = driver.findElement(By.xpath("//span[text()='$529.99']")).getText();
-  
-		
-		FileInputStream fis = new FileInputStream(IAutoConstants.ex_path);
-		Workbook wb = WorkbookFactory.create(fis);
-		wb.getSheet("Sheet3").getRow(1).createCell(1).setCellValue(priceOfProduct);
-		
-	FileOutputStream fos = new FileOutputStream(IAutoConstants.ex_path);	
-		wb.write(fos);
-		
-		String rating = driver.findElement(By.xpath("//div[text()='4.7']")).getText();
+		webutil.TakeScreenshort(driver, "Smartwatchdetails_2");
+
+		String priceOfProduct = customize.getPrizetext().getText();
+
+		FileLib fileutil=new FileLib();
+		fileutil.writeExcelData("sheet3", 1, 1, priceOfProduct);
+
+
+		String rating = customize.getRatingtext().getText();
 		System.out.println(rating);
-		
-		
-		
 
-
-
-
-
-
-
-
-
+		if(rating.contentEquals("4")) {
+			driver.findElement(By.xpath("//*[local-name()='svg' and @style=\"height: 24px;\"]")).click();
+		}
 
 
 
